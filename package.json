@@ -1,0 +1,5 @@
+{
+    "dependencies": {
+      "typedb-driver": "^2.26.5"
+    }
+  }
