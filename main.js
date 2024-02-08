@@ -12,8 +12,8 @@ async function main() {
     const driver = await TypeDB.coreDriver(SERVER_ADDR);
     
     let dbs = await driver.databases.all();
-    for(let i = 0; i < dbs.length; i++) {
-        console.log("DB " + dbs[i]);
+    for (db of dbs) {
+        console.log(db.name);  
     }
 
     if (await driver.databases.contains(DB_NAME)) {
