@@ -4,7 +4,7 @@ const { TransactionType } = require("typedb-driver/api/connection/TypeDBTransact
 const { TypeDBOptions } = require("typedb-driver/api/connection/TypeDBOptions");
 
 async function main() {
-    const DB_NAME = "iam";
+    const DB_NAME = "sample_db";
     const SERVER_ADDR = "127.0.0.1:1729";
 
     console.log("TypeDB Manual sample code");
@@ -17,8 +17,7 @@ async function main() {
     }
 
     if (await driver.databases.contains(DB_NAME)) {
-        let x = await driver.databases.get(DB_NAME);
-        await x.delete();
+        await (await driver.databases.get(DB_NAME)).delete();
     }
     await driver.databases.create(DB_NAME);
 
