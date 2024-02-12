@@ -1,30 +1,34 @@
+// tag::import[]
 const { TypeDB } = require("typedb-driver/TypeDB");
 const { SessionType } = require("typedb-driver/api/connection/TypeDBSession");
 const { TransactionType } = require("typedb-driver/api/connection/TypeDBTransaction");
 const { TypeDBOptions } = require("typedb-driver/api/connection/TypeDBOptions");
-
+// end::import[]
 async function main() {
     const DB_NAME = "sample_db";
-    const SERVER_ADDR = "127.0.0.1:1729";
 
     console.log("TypeDB Manual sample code");
-
-    const driver = await TypeDB.coreDriver(SERVER_ADDR);
-    
+    // tag::driver[]
+    const driver = await TypeDB.coreDriver("127.0.0.1:1729");
+    // end::driver[]
+    // tag::list-db[]
     let dbs = await driver.databases.all();
     for (db of dbs) {
-        console.log(db.name);  
+        console.log(db.name);
     }
-
+    // end::list-db[]
+    // tag::delete-db[]
     if (await driver.databases.contains(DB_NAME)) {
         await (await driver.databases.get(DB_NAME)).delete();
     }
+    // end::delete-db[]
+    // tag::create-db[]
     await driver.databases.create(DB_NAME);
-
+    // end::create-db[]
     if (driver.databases.contains(DB_NAME)) {
         console.log("Database setup complete.");
     }
-
+    // tag::define[]
     try {
         session = await driver.session(DB_NAME, SessionType.SCHEMA);
         try {
@@ -46,7 +50,8 @@ async function main() {
         finally {if (transaction.isOpen()) {await transaction.close()};}
     }
     finally {await session?.close();}
-
+    // end::define[]
+    // tag::undefine[]
     try {
         session = await driver.session(DB_NAME, SessionType.SCHEMA);
         try {
@@ -58,7 +63,8 @@ async function main() {
         finally {if (transaction.isOpen()) {await transaction.close()};}
     }
     finally {await session?.close();}
-
+    // end::undefine[]
+    // tag::insert[]
     try {
         session = await driver.session(DB_NAME, SessionType.DATA);
         try {
@@ -75,7 +81,8 @@ async function main() {
         finally {if (transaction.isOpen()) {await transaction.close()};}
     }
     finally {await session?.close();}
-
+    // end::insert[]
+    // tag::match-insert[]
     try {
         session = await driver.session(DB_NAME, SessionType.DATA);
         try {
@@ -96,7 +103,8 @@ async function main() {
         finally {if (transaction.isOpen()) {await transaction.close()};}
     }
     finally {await session?.close();}
-
+    // end::match-insert[]
+    // tag::delete[]
     try {
         session = await driver.session(DB_NAME, SessionType.DATA);
         try {
@@ -113,8 +121,9 @@ async function main() {
         }
         finally {if (transaction.isOpen()) {await transaction.close()};}
     }
-    finally {await session?.close();}    
-    
+    finally {await session?.close();}
+    // end::delete[]
+    // tag::update[]
     try {
         session = await driver.session(DB_NAME, SessionType.DATA);
         try {
@@ -136,7 +145,8 @@ async function main() {
         finally {if (transaction.isOpen()) {await transaction.close()};}
     }
     finally {await session?.close();}
-
+    // end::update[]
+    // tag::fetch[]
     try {
         session = await driver.session(DB_NAME, SessionType.DATA);
         try {
@@ -148,16 +158,15 @@ async function main() {
                                 $u: name, email;
                                 `;
             let response = await transaction.query.fetch(fetch_query).collect();
-            k = 0;
             for(let i = 0; i < response.length; i++) {
-                k++;
-                console.log("User #" + k + ": " + JSON.stringify(response[i], null, 4));
+                console.log("User #" + (i + 1) + ": " + JSON.stringify(response[i], null, 4));
             }
         }
         finally {if (transaction.isOpen()) {await transaction.close()};}
     }
     finally {await session?.close();}
-    
+    // end::fetch[]
+    // tag::get[]
     try {
         session = await driver.session(DB_NAME, SessionType.DATA);
         try {
@@ -169,16 +178,15 @@ async function main() {
                                 $e;
                                 `;
             let response = await transaction.query.get(get_query).collect();
-            k = 0;
             for(let i = 0; i < response.length; i++) {
-                k++;
-                console.log("Email #" + k + ": " + response[i].get("e").value);
+                console.log("Email #" + (i + 1) + ": " + response[i].get("e").value);
             }
         }
         finally {if (transaction.isOpen()) {await transaction.close()};}
     }
     finally {await session?.close();}
-
+    // end::get[]
+    // tag::infer-rule[]
     try {
         session = await driver.session(DB_NAME, SessionType.SCHEMA);
         try {
@@ -198,7 +206,8 @@ async function main() {
         finally {if (transaction.isOpen()) {await transaction.close()};}
     }
     finally {await session?.close();}
-
+    // end::infer-rule[]
+    // tag::infer-fetch[]
     try {
         session = await driver.session(DB_NAME, SessionType.DATA);
         try {
@@ -212,15 +221,14 @@ async function main() {
                                 $u: name, email;
                                 `;
             let response = await transaction.query.fetch(fetch_query).collect();
-            k = 0;
             for(let i = 0; i < response.length; i++) {
-                k++;
-                console.log("User #" + k + ": " + JSON.stringify(response[i], null, 4));
+                console.log("User #" + (i + 1) + ": " + JSON.stringify(response[i], null, 4));
             }
         }
         finally {if (transaction.isOpen()) {await transaction.close()};}
     }
     finally {await session?.close();}
+    // end::infer-fetch[]
 };
 
 main();
