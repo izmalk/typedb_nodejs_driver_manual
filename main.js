@@ -157,7 +157,7 @@ async function main() {
                                 $u: name, email;
                                 `;
             let response = await txn.query.fetch(fetch_query).collect();
-            for(let i = 0; i < response.length; i++) {
+            for (let i = 0; i < response.length; i++) {
                 console.log("User #" + (i + 1) + ": " + JSON.stringify(response[i], null, 4));
             }
         }
@@ -177,7 +177,7 @@ async function main() {
                                 $e;
                                 `;
             let response = await txn.query.get(get_query).collect();
-            for(let i = 0; i < response.length; i++) {
+            for (let i = 0; i < response.length; i++) {
                 console.log("Email #" + (i + 1) + ": " + response[i].get("e").value);
             }
         }
