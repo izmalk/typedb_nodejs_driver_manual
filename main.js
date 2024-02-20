@@ -265,11 +265,11 @@ async function main() {
         session = await driver.session(DB_NAME, SessionType.SCHEMA);
         try {
             tx = await session.transaction(TransactionType.WRITE);
-            await tx.logic.getRules().forEach(rule => {
+            for await (const rule of tx.logic.getRules()) {
                 console.log("Rule label: " + rule.label);
                 console.log("  Condition: " + rule.when);
                 console.log("  Conclusion: " + rule.then);
-            });
+            }    
             let new_rule = await tx.logic.putRule("Employee","{$u isa user, has email $e; $e contains '@vaticle.com';}","$u has name 'Employee'");
             console.log((await tx.logic.getRule("Employee")).label);
             await new_rule.delete(tx);
@@ -320,7 +320,7 @@ async function main() {
             for(let i = 0; i < response.length; i++) {
                 console.log("Name #" + (i + 1) + ": " + response[i].get("n").value);
                 let explainable_relations = await response[i].explainables.relations;
-                explainable_relations.forEach(explainable => {
+                for await (const explainable of explainable_relations) {
                     console.log("Explainable part of the query: " + explainable.conjunction())
                     explain_iterator = tx.query.explain(explainable);
                     for (explanation of explain_iterator) {
@@ -331,7 +331,7 @@ async function main() {
                             console.log("Query variable " + qvar + " maps to the rule variable " + explanation.variableMapping.get(qvar))
                         }
                     }
-                });
+                }
             } 
         }
         finally {if (tx.isOpen()) {await tx.close()};}
