@@ -31,7 +31,7 @@ async function main() {
     try {
         session = await driver.session(DB_NAME, SessionType.SCHEMA);
         try {
-            txn = await session.transaction(TransactionType.WRITE);
+            tx = await session.transaction(TransactionType.WRITE);
             const define_query = `
                                 define
                                 email sub attribute, value string;
@@ -43,10 +43,10 @@ async function main() {
                                     plays friendship:friend;
                                 admin sub user;
                                 `;
-            await txn.query.define(define_query);
-            await txn.commit();
+            await tx.query.define(define_query);
+            await tx.commit();
         }
-        finally {if (txn.isOpen()) {await txn.close()};}
+        finally {if (tx.isOpen()) {await tx.close()};}
     }
     finally {await session?.close();}
     // end::define[]
@@ -54,12 +54,12 @@ async function main() {
     try {
         session = await driver.session(DB_NAME, SessionType.SCHEMA);
         try {
-            txn = await session.transaction(TransactionType.WRITE);
+            tx = await session.transaction(TransactionType.WRITE);
             const undefine_query = "undefine admin sub user;";
-            await txn.query.undefine(undefine_query);
-            await txn.commit();
+            await tx.query.undefine(undefine_query);
+            await tx.commit();
         }
-        finally {if (txn.isOpen()) {await txn.close()};}
+        finally {if (tx.isOpen()) {await tx.close()};}
     }
     finally {await session?.close();}
     // end::undefine[]
@@ -67,17 +67,17 @@ async function main() {
     try {
         session = await driver.session(DB_NAME, SessionType.DATA);
         try {
-            txn = await session.transaction(TransactionType.WRITE);
+            tx = await session.transaction(TransactionType.WRITE);
             const insert_query = `
                                 insert
                                 $user1 isa user, has name "Alice", has email "alice@vaticle.com";
                                 $user2 isa user, has name "Bob", has email "bob@vaticle.com";
                                 $friendship (friend:$user1, friend: $user2) isa friendship;
                                 `;
-            await txn.query.insert(insert_query);
-            await txn.commit();
+            await tx.query.insert(insert_query);
+            await tx.commit();
         }
-        finally {if (txn.isOpen()) {await txn.close()};}
+        finally {if (tx.isOpen()) {await tx.close()};}
     }
     finally {await session?.close();}
     // end::insert[]
@@ -85,7 +85,7 @@ async function main() {
     try {
         session = await driver.session(DB_NAME, SessionType.DATA);
         try {
-            txn = await session.transaction(TransactionType.WRITE);
+            tx = await session.transaction(TransactionType.WRITE);
             const match_insert_query = `
                                 match
                                 $u isa user, has name "Bob";
@@ -93,13 +93,13 @@ async function main() {
                                 $new-u isa user, has name "Charlie", has email "charlie@vaticle.com";
                                 $f($u,$new-u) isa friendship;
                                 `;
-            let response = await txn.query.insert(match_insert_query).collect();
+            let response = await tx.query.insert(match_insert_query).collect();
             if (response.length == 1) {
-                await txn.commit();
+                await tx.commit();
             }
-            else {await txn.close();}
+            else {await tx.close();}
         }
-        finally {if (txn.isOpen()) {await txn.close()};}
+        finally {if (tx.isOpen()) {await tx.close()};}
     }
     finally {await session?.close();}
     // end::match-insert[]
@@ -107,7 +107,7 @@ async function main() {
     try {
         session = await driver.session(DB_NAME, SessionType.DATA);
         try {
-            txn = await session.transaction(TransactionType.WRITE);
+            tx = await session.transaction(TransactionType.WRITE);
             const delete_query = `
                                 match
                                 $u isa user, has name "Charlie";
@@ -115,10 +115,10 @@ async function main() {
                                 delete
                                 $f isa friendship;
                                 `;
-            await txn.query.delete(delete_query);
-            await txn.commit();
+            await tx.query.delete(delete_query);
+            await tx.commit();
         }
-        finally {if (txn.isOpen()) {await txn.close()};}
+        finally {if (tx.isOpen()) {await tx.close()};}
     }
     finally {await session?.close();}
     // end::delete[]
@@ -126,7 +126,7 @@ async function main() {
     try {
         session = await driver.session(DB_NAME, SessionType.DATA);
         try {
-            txn = await session.transaction(TransactionType.WRITE);
+            tx = await session.transaction(TransactionType.WRITE);
             const update_query = `
                                 match
                                 $u isa user, has name "Charlie", has email $e;
@@ -135,13 +135,13 @@ async function main() {
                                 insert
                                 $u has email "charles@vaticle.com";
                                 `;
-            let response = await txn.query.update(update_query).collect();
+            let response = await tx.query.update(update_query).collect();
             if (response.length == 1) {
-                await txn.commit();
+                await tx.commit();
             }
-            else {await txn.close();}
+            else {await tx.close();}
         }
-        finally {if (txn.isOpen()) {await txn.close()};}
+        finally {if (tx.isOpen()) {await tx.close()};}
     }
     finally {await session?.close();}
     // end::update[]
@@ -149,19 +149,19 @@ async function main() {
     try {
         session = await driver.session(DB_NAME, SessionType.DATA);
         try {
-            txn = await session.transaction(TransactionType.READ);
+            tx = await session.transaction(TransactionType.READ);
             const fetch_query = `
                                 match
                                 $u isa user;
                                 fetch
                                 $u: name, email;
                                 `;
-            let response = await txn.query.fetch(fetch_query).collect();
+            let response = await tx.query.fetch(fetch_query).collect();
             for (let i = 0; i < response.length; i++) {
                 console.log("User #" + (i + 1) + ": " + JSON.stringify(response[i], null, 4));
             }
         }
-        finally {if (txn.isOpen()) {await txn.close()};}
+        finally {if (tx.isOpen()) {await tx.close()};}
     }
     finally {await session?.close();}
     // end::fetch[]
@@ -169,19 +169,19 @@ async function main() {
     try {
         session = await driver.session(DB_NAME, SessionType.DATA);
         try {
-            txn = await session.transaction(TransactionType.READ);
+            tx = await session.transaction(TransactionType.READ);
             const get_query = `
                                 match
                                 $u isa user, has email $e;
                                 get
                                 $e;
                                 `;
-            let response = await txn.query.get(get_query).collect();
+            let response = await tx.query.get(get_query).collect();
             for (let i = 0; i < response.length; i++) {
                 console.log("Email #" + (i + 1) + ": " + response[i].get("e").value);
             }
         }
-        finally {if (txn.isOpen()) {await txn.close()};}
+        finally {if (tx.isOpen()) {await tx.close()};}
     }
     finally {await session?.close();}
     // end::get[]
@@ -189,7 +189,7 @@ async function main() {
     try {
         session = await driver.session(DB_NAME, SessionType.SCHEMA);
         try {
-            txn = await session.transaction(TransactionType.WRITE);
+            tx = await session.transaction(TransactionType.WRITE);
             const define_query = `
                                 define
                                 rule users:
@@ -199,10 +199,10 @@ async function main() {
                                     $u has name "User";
                                 };
                                 `;
-            await txn.query.define(define_query);
-            await txn.commit();
+            await tx.query.define(define_query);
+            await tx.commit();
         }
-        finally {if (txn.isOpen()) {await txn.close()};}
+        finally {if (tx.isOpen()) {await tx.close()};}
     }
     finally {await session?.close();}
     // end::infer-rule[]
@@ -212,19 +212,19 @@ async function main() {
         try {
             let options = new TypeDBOptions();
             options.infer = true;
-            txn = await session.transaction(TransactionType.READ, options);
+            tx = await session.transaction(TransactionType.READ, options);
             const fetch_query = `
                                 match
                                 $u isa user;
                                 fetch
                                 $u: name, email;
                                 `;
-            let response = await txn.query.fetch(fetch_query).collect();
+            let response = await tx.query.fetch(fetch_query).collect();
             for(let i = 0; i < response.length; i++) {
                 console.log("User #" + (i + 1) + ": " + JSON.stringify(response[i], null, 4));
             }
         }
-        finally {if (txn.isOpen()) {await txn.close()};}
+        finally {if (tx.isOpen()) {await tx.close()};}
     }
     finally {await session?.close();}
     // end::infer-fetch[]
@@ -232,14 +232,14 @@ async function main() {
     try {
         session = await driver.session(DB_NAME, SessionType.SCHEMA);
         try {
-            txn = await session.transaction(TransactionType.WRITE);
-            let tag = await txn.concepts.putAttributeType("tag", Concept.ValueType.STRING);
-            let rootEntity = await txn.concepts.getRootEntityType();
-            let entites = await rootEntity.getSubtypes(txn, Concept.Transitivity.EXPLICIT);
-            await entites.forEach(entity => entity.setOwns(txn, tag));
-            await txn.commit();
+            tx = await session.transaction(TransactionType.WRITE);
+            let tag = await tx.concepts.putAttributeType("tag", Concept.ValueType.STRING);
+            let rootEntity = await tx.concepts.getRootEntityType();
+            let entites = await rootEntity.getSubtypes(tx, Concept.Transitivity.EXPLICIT);
+            await entites.forEach(entity => entity.setOwns(tx, tag));
+            await tx.commit();
         }
-        finally {if (txn.isOpen()) {await txn.close()};}
+        finally {if (tx.isOpen()) {await tx.close()};}
     }
     finally {await session?.close();}
     // end::types-editing[]
@@ -247,16 +247,16 @@ async function main() {
     try {
         session = await driver.session(DB_NAME, SessionType.SCHEMA);
         try {
-            txn = await session.transaction(TransactionType.WRITE);
-            let user = await txn.concepts.getEntityType("user");
-            let admin = await txn.concepts.putEntityType("admin");
-            await admin.setSupertype(txn, user);
-            let rootEntity = await txn.concepts.getRootEntityType();
-            let subtypes = await rootEntity.getSubtypes(txn, Concept.Transitivity.TRANSITIVE);
+            tx = await session.transaction(TransactionType.WRITE);
+            let user = await tx.concepts.getEntityType("user");
+            let admin = await tx.concepts.putEntityType("admin");
+            await admin.setSupertype(tx, user);
+            let rootEntity = await tx.concepts.getRootEntityType();
+            let subtypes = await rootEntity.getSubtypes(tx, Concept.Transitivity.TRANSITIVE);
             await subtypes.forEach(subtype => console.log(subtype.label.toString()));
-            await txn.commit();
+            await tx.commit();
         }
-        finally {if (txn.isOpen()) {await txn.close()};}
+        finally {if (tx.isOpen()) {await tx.close()};}
     }
     finally {await session?.close();}
     // end::types-api[]
@@ -264,18 +264,18 @@ async function main() {
     try {
         session = await driver.session(DB_NAME, SessionType.SCHEMA);
         try {
-            txn = await session.transaction(TransactionType.WRITE);
-            await txn.logic.getRules().forEach(rule => {
+            tx = await session.transaction(TransactionType.WRITE);
+            await tx.logic.getRules().forEach(rule => {
                 console.log("Rule label: " + rule.label);
                 console.log("  Condition: " + rule.when);
                 console.log("  Conclusion: " + rule.then);
             });
-            let new_rule = await txn.logic.putRule("Employee","{$u isa user, has email $e; $e contains '@vaticle.com';}","$u has name 'Employee'");
-            console.log((await txn.logic.getRule("Employee")).label);
-            await new_rule.delete(txn);
-            await txn.commit();
+            let new_rule = await tx.logic.putRule("Employee","{$u isa user, has email $e; $e contains '@vaticle.com';}","$u has name 'Employee'");
+            console.log((await tx.logic.getRule("Employee")).label);
+            await new_rule.delete(tx);
+            await tx.commit();
         }
-        finally {if (txn.isOpen()) {await txn.close()};}
+        finally {if (tx.isOpen()) {await tx.close()};}
     }
     finally {await session?.close();}
     // end::rules-api[]
@@ -283,21 +283,21 @@ async function main() {
     try {
         session = await driver.session(DB_NAME, SessionType.DATA);
         try {
-            txn = await session.transaction(TransactionType.WRITE);
-            let userType = await txn.concepts.getEntityType("user");
-            let users = userType.getInstances(txn);
+            tx = await session.transaction(TransactionType.WRITE);
+            let userType = await tx.concepts.getEntityType("user");
+            let users = userType.getInstances(tx);
             for await (const user of users) {
-                let attributes = user.getHas(txn);
+                let attributes = user.getHas(tx);
                 console.log("User:");
                 for await (const attribute of attributes) {
                     console.log(" " + attribute.type.label.toString() + ": " + attribute.value.toString());
                 }
             }
-            let newUser = await (await txn.concepts.getEntityType("user")).create(txn);
-            await newUser.delete(txn);
-            await txn.commit();
+            let newUser = await (await tx.concepts.getEntityType("user")).create(tx);
+            await newUser.delete(tx);
+            await tx.commit();
         }
-        finally {if (txn.isOpen()) {await txn.close()};}
+        finally {if (tx.isOpen()) {await tx.close()};}
     }
     finally {await session?.close();}
     // end::data-api[]
@@ -308,7 +308,7 @@ async function main() {
             let options = new TypeDBOptions();
             options.infer = true;
             options.explain = true;
-            txn = await session.transaction(TransactionType.READ, options);
+            tx = await session.transaction(TransactionType.READ, options);
             const get_query = `
                                 match
                                 $u isa user, has email $e, has name $n;
@@ -316,13 +316,13 @@ async function main() {
                                 get
                                 $u, $n;
                                 `;
-            let response = await txn.query.get(get_query).collect();
+            let response = await tx.query.get(get_query).collect();
             for(let i = 0; i < response.length; i++) {
                 console.log("Name #" + (i + 1) + ": " + response[i].get("n").value);
                 let explainable_relations = await response[i].explainables.relations;
                 explainable_relations.forEach(explainable => {
                     console.log("Explainable part of the query: " + explainable.conjunction())
-                    explain_iterator = txn.query.explain(explainable);
+                    explain_iterator = tx.query.explain(explainable);
                     for (explanation of explain_iterator) {
                         console.log("Rule: " + explanation.rule.label)
                         console.log("Condition: " + explanation.condition.toString())
@@ -334,7 +334,7 @@ async function main() {
                 });
             } 
         }
-        finally {if (txn.isOpen()) {await txn.close()};}
+        finally {if (tx.isOpen()) {await tx.close()};}
     }
     finally {await session?.close();}
     // end::explain-get[]
